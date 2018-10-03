@@ -1,0 +1,4 @@
+FOLD_CHANGE_UPPER_CUT_OFF = 1.5
+
+
+

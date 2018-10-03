@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block css %}
+<!--<link rel="stylesheet" type="text/css" href="/static/css/default.css">-->
+<!-- <link rel="stylesheet" type="text/css" href="/static/css/nouislider.css"> -->
+<!-- div.demo { padding: 10px !important; }; -->
+{% endblock css%}
+{% block js %}
+
+<script type="text/javascript">
+
+  $(document).ready(function() {
+    $('#filesTable').DataTable();
+
+
+    $('#databaseTable').DataTable({paging:false});
+
+  $('#selectAllDatabases').click ( function()    
+   {        
+     $("input[name='database']").prop('checked', $(this).is(':checked'));
+   }
+  );
+  
+  } );
+  
+  function submitListDatabases(obj){
+
+    $("#databaseListForm").attr("action","/lymePortal/visualizationOptions/");
+
+    $("#databaseListForm").submit();
+  }
+
+</script>
+
+{% endblock js %}
+
+{% block content %}
+
+<!-- /.row -->
+<div class="row">
+  <div class="col-lg-12">
+    <h1 class="page-header">Files</h1>
+  </div>
+  <!-- /.col-lg-12 -->
+</div>
+<!-- /.row -->
+<form method = "post" id = "databaseListForm" name = "databaseListForm" action="/lymePortal/visualizationOptions/">
+ {% csrf_token %}
+ <input type="hidden" value="" name="projectId" id ="projectId"/>
+ <p>
+  {% if messages %}
+    <ul class="messages">
+    {% for message in messages %}
+      <li{% if message.tags %} class="{{ message.tags }}"{% endif %}><font color="red">{{ message }}</font></li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+ </p>
+ <div class="row">
+  <div class="col-lg-12">
+    <div class="panel panel-primary">
+      <div class="panel-heading">
+      	  <h4 class="panel-title">
+	    <a data-toggle="collapse" data-parent="#panels1" href="#listProjectsPanel">
+		File list. (Click to toggle this panel.)
+	    </a>
+	  </h4>
+      </div>
+      <!-- /.panel-heading -->
+      <div id="listFilesPanel" class="panel-collapse collapse in" style="overflow-y:auto;height:300px;" -webkit-scrollbar>
+      <div class="panel-body" >
+
+        <div class="table-responsive" >
+	  <table id="filesTable" class="display" cellspacing="0" width="100%">
+	   <thead>
+	      <tr >
+		<th>Name</th>
+              </tr>
+           </thead>
+           <tbody>
+           {% for fileName in fileNames %}
+             <tr>
+               <td> {{ fileName }}  </td>
+             </tr>
+           {% endfor %}
+           </tbody>
+          </table>
+        </div>
+        <!-- /.table-responsive -->
+      </div>
+      <!-- /.panel-body -->
+      </div>
+    </div>
+    <!-- /.panel -->
+  </div>
+  <!-- /.col-lg-12 -->
+ </div>
+ <!-- /.row -->
+ <div class="row">
+  <div class="col-lg-12">
+    <div class="panel panel-primary">
+      <div class="panel-heading">
+      	  <h4 class="panel-title">
+	    <a data-toggle="collapse" data-parent="#panels1" href="#listProjectsPanel">
+		Database list. (Click to toggle this panel.)
+	    </a>
+	  </h4>
+      </div>
+      <!-- /.panel-heading -->
+      <div id="listDatabasesPanel" class="panel-collapse collapse in" style="overflow-y:auto;height:300px;" -webkit-scrollbar>
+      <div class="panel-body" >
+        <p> Please select databases for visualisation of the results of pathway analysis. All databases are selected by default. However, selecting a smaller set might make the results more navigable and help understand which pathways / genes are have differential expression in a certain conditions. </p>
+        <div class="table-responsive" >
+	  <table id="databaseTable" class="display" cellspacing="0" width="100%">
+	   <thead>
+	      <tr >
+		<th>Select<input type="checkbox" value="" name="selectAllDatabases" id="selectAllDatabases" checked="checked"></th>
+		<th>Name</th>
+              </tr>
+           </thead>
+           <tbody>
+           {% for database in databases %}
+             <tr>
+		<td><input type="checkbox" id="database-{{forloop.counter0}}" name="database" value={{database}} checked></td>  
+               <td> {{ database }}  </td>
+             </tr>
+           {% endfor %}
+           </tbody>
+          </table>
+        </div>
+        <!-- /.table-responsive -->
+      </div>
+      <!-- /.panel-body -->
+      </div>
+    </div>
+    <!-- /.panel -->
+  </div>
+  <!-- /.col-lg-12 -->
+ </div>
+ <!-- /.row -->
+
+ <p class="text-center">
+
+  <button type="submit" class="btn btn-primary btn-lg" value = "0" name = "submitButton" id="submitButton-0" onclick ="javascript:submitAddProject(this);">Submit</button>&nbsp;&nbsp;&nbsp;
+ </p>
+</form>
+{% endblock content %}

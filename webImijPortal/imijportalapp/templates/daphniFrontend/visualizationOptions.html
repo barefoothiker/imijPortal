@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+
+{% block css %}
+{% endblock css%}
+
+{% block js %}
+
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script>
+  $(document).ready(function() {
+    $('#dataFileTable').DataTable();  
+google.charts.load('current', {'packages':['treemap']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+      var data = new google.visualization.DataTable();
+      data.addColumn('string', 'ID');
+      data.addColumn('string', 'Parent');
+      data.addColumn('number', 'Number Of Lines');
+      data.addRows([
+
+       {% for row in treeMapDataList %}
+        ['{{row.0}}' , {% if row.1 == "null" %}null{% else %}'{{row.1}}'{% endif %}, {% if row.2 == "null" %}null{% else %}{{row.2}}{% endif %}],
+
+       {% endfor %}
+      ]);
+
+      var tree = new google.visualization.TreeMap(document.getElementById('chart_div'));
+
+      var options = {
+        highlightOnMouseOver: true,
+        maxDepth: 1,
+        maxPostDepth: 2,
+        minHighlightColor: '#8c6bb1',
+        midHighlightColor: '#9ebcda',
+        maxHighlightColor: '#edf8fb',
+        minColor: '#009688',
+        midColor: '#f7f7f7',
+        maxColor: '#ee8100',
+        headerHeight: 15,
+        showScale: true,
+        height: 500,
+        useWeightedAverageForAggregation: true
+      };
+
+        tree.draw(data, options);
+
+      }
+    } );
+
+  function submitTreemapReload(obj){
+
+    $("#reloadPage").val("1");
+    $("#dataFileForm").attr("action","/lymePortal/visualizationOptions/");
+    $("#dataFileForm").submit();
+
+  } 
+  
+  function submitGenesDetail(geneIds){
+
+    $("#entrezIds").val(geneIds);
+    $("#dataFileForm").attr("action","/lymePortal/displayGeneDetails/");
+    $("#dataFileForm").submit();
+
+  } 
+
+</script>
+{% endblock js %}
+
+{% block content %}
+
+<!-- /.row -->
+<div class="row">
+  <div class="col-lg-12">
+    <h1 class="page-header">Expression data</h1>
+  </div>
+  <!-- /.col-lg-12 -->
+</div>
+<!-- /.row -->
+<form method = "post" id = "dataFileForm" name = "dataFileForm" action="/lymePortal/visualizeData/">
+ {% csrf_token %}
+ <input type="hidden" value="0" name="reloadPage" id ="reloadPage"/>
+ <input type="hidden" value="" name="dataFileId" id ="dataFileId"/>
+<input type="hidden" value="" name="entrezIds" id ="entrezIds"/>
+
+{% for database in databases %}
+ <input type="hidden" name = "database" id = "database-{{forloop.counter0}}" value="{{database}}"/>
+{% endfor %}
+
+ <input type="hidden" value="{{project.id}}" name="projectId" id ="projectId"/>
+  <div class="row">
+  <div class="col-lg-12">
+    <div class="panel panel-primary">
+      <div class="panel-heading">
+        Visualise results of gene expression pathway.
+      </div>
+      <!-- /.panel-heading -->
+      <div class="panel-body" >
+      
+
+      <p>Below is an interactive treemap of the gene expression data. Each rectangle in the treemap represents a pathway, weighted by the total negative log of adjusted p value.
+      <br/>
+      To zoom in, click on the rectangle. You will be navigated to a screen that has the genes belonging ot the pathway. To zoom out, you can right click.
+      <br/>
+      If you would like to use a different database, please select from the dropdown and click Reload button.
+      </p>
+
+      <p>Database:&nbsp;<label>{{treemapDatabase}}</label></p>
+      <p>Select database:&nbsp;
+	  <div class="form-group">
+    	    <div class="text">
+	      <label>
+		<b>Database:</b>
+	          <select id = "treemapDatabase" name = "treemapDatabase" >
+	           <option id = "columnType-default" value = ""> -- Select -- </option>
+		   {% for database in databases %}
+		      <option id = "treemapDatabaseOption-{{forloop.counter0}}" name = "treemapDatabaseOption" value = {{database}} {% if database == treemapDatabase %}selected{% endif %}>{{database}}</option>
+		   {% endfor %}
+		  </select>
+		</label>
+	    </div>
+	    <p class="help-block">Select database for treemap display.</p>
+	  </div>
+	  
+	  <p class="text-center">
+	
+	   <button type="submit" class="btn btn-primary btn-lg" value = "0" name = "submitButton" id="submitButton-0" onclick ="javascript:submitTreemapReload(this);">Reload</button>&nbsp;&nbsp;&nbsp;
+	
+	 </p>	  
+
+	  <div id="chart_div"></div>
+
+	  <div class="table-responsive" >
+	    <table id="dataFileTable" class="display" cellspacing="0" width="100%">
+	     <thead>
+		<tr >
+		  <th>Time points</th>
+		  <th>Pathway</th>
+		  <th>Adjusted p Value</th>
+		  <th>Genes</th>
+		  <th>Evidence Matrix</th>
+		</tr>
+	     </thead>
+	     <tbody>
+	     {% for row in dataRows %}
+	       <tr>
+		 <td>{{ row.0 }}</td>
+		 <td> {% if treemapDatabase == 'BioCarta_pathways'%}<a href="http://software.broadinstitute.org/gsea/msigdb/cards/BIOCARTA_{{ row.4 }}" target="_blank">{{ row.1 }}</a>{% else %}{{row.0}}{% endif %}</td>
+		 <td> {{ row.2 }}  </td>
+		 <td>{% for elem in row.3 %}<a href='https://www.ncbi.nlm.nih.gov/gene/{{ elem.0 }}' target="_blank">{{elem.1}}</a>, {% endfor %}</td>
+		 <td>
+		  <button type="submit" class="btn btn-primary btn-lg" value = "1" name="submitButton" id="submitButton-1" onclick ="javascript:submitGenesDetail('{% for elem in row.3 %}{{elem.0}},{% endfor %}');">Literature</button>		 
+		 </td>
+	       </tr>
+	     {% endfor %}
+	     </tbody>
+	    </table>
+	  </div>
+	  <!-- /.table-responsive -->
+
+	<p><font color="red">*</font> indicates required field</p>
+
+          <div class="form-group">
+
+	    <div class="text">
+	      <label>
+		<b>File 1:</b>
+	          <select id = "fileName1" name = "fileName1" >
+	           <option id = "columnType-default" value = ""> -- Select -- </option>
+		   {% for fileName in fileNames %}
+		      <option id = "fileName1" name = "fileName1" value = {{fileName}}>{{fileName}}</option>
+		   {% endfor %}
+		  </select>
+		</label>
+	    </div>
+	    <p class="help-block">Select File Name 1.</p>
+	  </div>
+
+          <div class="form-group">
+	    <div class="text">
+	      <label>
+		<b>File 2:</b>
+	          <select id = "fileName2" name = "fileName2" >
+	           <option id = "columnType-default" value = ""> -- Select -- </option>
+		   {% for fileName in fileNames %}
+		      <option id = "fileName2" name = "fileName2" value = {{fileName}}>{{fileName}}</option>
+		   {% endfor %}
+		  </select>
+	      </label>
+	    </div>
+	    <p class="help-block">Select File Name 2.</p>
+	  </div>
+
+          <div class="form-group">
+	    <div class="text">
+	      <label>
+		<b>Database:</b>
+	          <select id = "database" name = "database" >
+	           <option id = "columnType-default" value = ""> -- Select -- </option>
+		   {% for database in databases %}
+		      <option id = "database" name = "database" value = {{database}}>{{database}}</option>
+		   {% endfor %}
+		  </select>
+	      </label>
+	    </div>
+	    <p class="help-block">Select Database.</p>
+	  </div>
+
+          <div class="form-group">
+	    <div class="text">
+
+	      <label>
+		<b>Direction:</b>
+	          <select id = "direction" name = "direction" >
+	           <option id = "columnType-default" value = ""> -- Select -- </option>
+		   {% for direction in directions %}
+		      <option id = "direction" name = "direction" value = {{direction}}>{{direction}}</option>
+		   {% endfor %}
+		  </select>
+	      </label>
+
+	    </div>
+	    <p class="help-block">Select direction.</p>
+	  </div>
+	</div>
+
+      </div>
+      <!-- /.panel-body -->
+    </div>
+
+  </div>
+  <!-- /.col-lg-12 -->
+ </div>
+
+ <!-- /.row -->
+  <p class="text-center">
+
+   <button type="submit" class="btn btn-primary btn-lg" value = "0" name = "submitButton" id="submitButton-0" onclick ="javascript:submitDataFileHandlerForm(this);">Cancel</button>&nbsp;&nbsp;&nbsp;
+   <button type="submit" class="btn btn-danger btn-lg" value = "1" name="submitButton" id="submitButton-1" onclick ="javascript:submitDataFileHandlerForm(this);">Submit</button>
+
+ </p>
+</form>
+{% endblock content %}

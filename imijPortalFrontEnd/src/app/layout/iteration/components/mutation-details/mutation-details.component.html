@@ -1,0 +1,25 @@
+ <div>
+        <label>Mutation Type</label>
+        <input ng-model="variantClass">
+    </div>
+<table>
+<tr *ngFor="let mutationDetail of mutationDetails" >
+  <td>{{ mutationDetail.variantClass }}</td>
+ 
+</tr>
+</table>
+<!-- <h2>My Patients</h2>
+<md-card>
+  <md-input-container>
+    <input mdInput #patientName placeholder="Patient name">
+  </md-input-container>
+  <button md-raised-button (click)="add(patientName.value); patientName.value=''">Add</button>
+</md-card>
+<md-nav-list>
+  <a md-list-item *ngFor="let patient of patients" (click)="onSelect(patient)">
+    <span md-line>{{ patient.name }}</span>
+    <button md-icon-button (click)="delete(patient)">
+      <md-icon>delete</md-icon>
+    </button>
+  </a>
+</md-nav-list> -->

@@ -1,0 +1,28 @@
+<div [@routerTransition]>
+    <!-- <h2 class="text-muted">List patients</h2> -->
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card card-default">
+                <app-timeline></app-timeline>
+            </div>
+            <!-- /.card -->
+        </div>
+        <!-- /.col-lg-8 -->
+        <div class="col-lg-4">
+            <div class="card card-default mb-3">
+                <div class="card-header">
+                    <i class="fa fa-bell fa-fw"></i> Notifications card
+                </div>
+                <!-- /.card-header -->
+                <app-notification></app-notification>
+                <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+
+            <app-chat></app-chat>
+            <!-- /.card .chat-card -->
+        </div>
+        <!-- /.col-lg-4 -->
+    </div>
+</div>
